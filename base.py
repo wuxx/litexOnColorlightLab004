@@ -19,10 +19,10 @@ from ios import Led
 
 # IOs ----------------------------------------------------------------------------------------------
 
-_serial = [
-    ("serialJ1", 0,
-        Subsignal("tx", Pins("j1:0")), # J1.1
-        Subsignal("rx", Pins("j1:1")), # J1.2
+_serialx = [
+    ("serialJx", 0,
+        Subsignal("tx", Pins("J17")), # J1.1
+        Subsignal("rx", Pins("H18")), # J1.2
         IOStandard("LVCMOS33")
     ),
 ]
@@ -35,7 +35,7 @@ class BaseSoC(SoCCore):
         sys_clk_freq = int(25e6)
 
         # custom serial using j1 pins instead of led & button
-        platform.add_extension(_serial)
+        platform.add_extension(_serialx)
 
         # SoC with CPU
         SoCCore.__init__(self, platform,
@@ -44,10 +44,10 @@ class BaseSoC(SoCCore):
             ident                    = "LiteX CPU Test SoC 5A-75B", ident_version=True,
             integrated_rom_size      = 0x8000,
             integrated_main_ram_size = 0x4000,
-            uart_name                = "serialJ1")
+            uart_name                = "serialJx")
 
         # Clock Reset Generation
-        self.submodules.crg = CRG(platform.request("clk25"), ~platform.request("user_btn_n"))
+        self.submodules.crg = CRG(platform.request("clk25"), 0)
 
         # Led
         user_leds = Cat(*[platform.request("user_led_n", i) for i in range(1)])
@@ -67,7 +67,8 @@ def main():
     parser.add_argument("--cable", default="ft2232",    help="JTAG probe model")
     args = parser.parse_args()
 
-    soc = BaseSoC(revision="7.0")
+    #soc = BaseSoC(revision="7.0")
+    soc = BaseSoC(revision="6.1")
 
     builder = Builder(soc, **builder_argdict(args))
     builder.build(**trellis_argdict(args), run=args.build)
